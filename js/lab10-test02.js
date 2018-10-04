@@ -140,7 +140,7 @@ function addVoiceSynthesisToPaintings(e, painting) {
 
 function initMap(latitude, longitude) {
     let mapDiv = document.querySelector("div.d");
-    mapDiv.style.height = "400px";
+    mapDiv.style.height = "375px";
 
     let map;
     if (latitude && longitude) {
