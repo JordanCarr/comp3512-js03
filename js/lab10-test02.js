@@ -95,6 +95,10 @@ function populatePaintings(paintings) {
         let nameNode = document.createTextNode(painting.title);
         listItem.appendChild(nameNode);
 
+        //Add speech synthesis of painting description to painting
+        listItem.addEventListener("click", e => addVoiceSynthesisToPaintings(e, painting));
+
+        //Add created painting list item to the painting list
         paintingList.appendChild(listItem);
     });
 
@@ -103,6 +107,17 @@ function populatePaintings(paintings) {
 
     //Make gallery list section visible
     document.querySelector("div.c section").style.display = "block";
+}
+
+function addVoiceSynthesisToPaintings(e, painting) {
+    e.preventDefault();
+
+    //Create text to speak and speaking object for voice over from description
+    let message = painting.description;
+    let utterance = new SpeechSynthesisUtterance(message);
+
+    //Speak the description
+    window.speechSynthesis.speak(utterance);
 }
 
 function initMap(latitude, longitude) {
