@@ -1,20 +1,4 @@
-function initMap(latitude, longitude) {
-    let mapDiv = document.querySelector("div.d");
-    mapDiv.style.height = "300px";
-
-    let map;
-    if (latitude && longitude) {
-        map = new google.maps.Map(mapDiv, {
-            center: {lat: latitude, lng: longitude}, mapTypeId: "satellite", zoom: 18
-        });
-    } else {
-        map = false;
-    }
-
-    return map;
-}
-
-window.addEventListener("load", function () {
+window.addEventListener("load", () => {
     const endpoint = "https://gist.githubusercontent.com/rconnolly/a0ad7768d65b6fa46f4e007a1cf27193/"
                      + "raw/38696e5b84cd6b66667a6b87c66c058ab2606ba2/galleries.json";
 
@@ -56,7 +40,7 @@ function populateGalleryList(galleryListData) {
     let galleryList = document.querySelector("#galleryList");
 
     galleryListData.forEach(galleryName => {
-        let listItem = document.createElement("LI");
+        let listItem = document.createElement("li");
         let nameNode = document.createTextNode(galleryName);
         listItem.appendChild(nameNode);
 
@@ -65,6 +49,12 @@ function populateGalleryList(galleryListData) {
 
     //Make gallery list section visible
     document.querySelector("div.b section").style.display = "block";
+}
+
+function populateGalleryListEvents(galleryDescriptionData, paintingList, location) {
+    document.querySelectorAll("ul#galleryList li").forEach(item => item.addEventListener("click", e => {
+        galleryClickHandler(e, galleryDescriptionData, paintingList, location);
+    }));
 }
 
 function galleryClickHandler(e, galleryDescriptions, paintingList, locations) {
@@ -79,6 +69,18 @@ function galleryClickHandler(e, galleryDescriptions, paintingList, locations) {
     initMap(location.latitude, location.longitude);
 }
 
+function populateGalleryDescription(data) {
+    document.querySelector("#galleryName").textContent = data["Name"];
+    document.querySelector("#galleryNative").textContent = data["Native Name"];
+    document.querySelector("#galleryCity").textContent = data["City"];
+    document.querySelector("#galleryAddress").textContent = data["Address"];
+    document.querySelector("#galleryCountry").textContent = data["Country"];
+    document.querySelector("#galleryHome").textContent = data["Home"];
+
+    //Make details section visible
+    document.querySelector("div.a section").style.display = "grid";
+}
+
 function populatePaintings(paintings) {
     let oldPaintingList = document.querySelector("#paintingList");
     let paintingListParent = oldPaintingList.parentElement;
@@ -89,7 +91,7 @@ function populatePaintings(paintings) {
 
     //Populate new list with selected paintings
     paintings.forEach(painting => {
-        let listItem = document.createElement("LI");
+        let listItem = document.createElement("li");
         let nameNode = document.createTextNode(painting.title);
         listItem.appendChild(nameNode);
 
@@ -103,20 +105,14 @@ function populatePaintings(paintings) {
     document.querySelector("div.c section").style.display = "block";
 }
 
-function populateGalleryListEvents(galleryDescriptionData, paintingList, location) {
-    document.querySelectorAll("ul#galleryList li").forEach(item => item.addEventListener("click", e => {
-        galleryClickHandler(e, galleryDescriptionData, paintingList, location);
-    }));
-}
+function initMap(latitude, longitude) {
+    let mapDiv = document.querySelector("div.d");
+    mapDiv.style.height = "400px";
 
-function populateGalleryDescription(data) {
-    document.querySelector("#galleryName").textContent = data["Name"];
-    document.querySelector("#galleryNative").textContent = data["Native Name"];
-    document.querySelector("#galleryCity").textContent = data["City"];
-    document.querySelector("#galleryAddress").textContent = data["Address"];
-    document.querySelector("#galleryCountry").textContent = data["Country"];
-    document.querySelector("#galleryHome").textContent = data["Home"];
+    let map;
+    if (latitude && longitude) {
+        map = new google.maps.Map(mapDiv, {center: {lat: latitude, lng: longitude}, mapTypeId: "satellite", zoom: 18});
+    }
 
-    //Make details section visible
-    document.querySelector("div.a section").style.display = "grid";
+    return map;
 }
