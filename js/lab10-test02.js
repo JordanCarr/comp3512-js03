@@ -1,10 +1,22 @@
-function initMap() {
+function initMap(latitude, longitude) {
+    let mapDiv = document.querySelector("div.d");
+    mapDiv.style.height = "300px";
 
+    let map;
+    if (latitude && longitude) {
+        map = new google.maps.Map(mapDiv, {
+            center: {lat: latitude, lng: longitude}, mapTypeId: "satellite", zoom: 18
+        });
+    } else {
+        map = false;
+    }
+
+    return map;
 }
 
 window.addEventListener("load", function () {
-    const endpoint = "https://gist.githubusercontent.com/" + "rconnolly/a0ad7768d65b6fa46f4e007a1cf27193/"
-                     + "raw/38696e5b84cd6b66667a6b87c66c058ab2606ba2/" + "galleries.json";
+    const endpoint = "https://gist.githubusercontent.com/rconnolly/a0ad7768d65b6fa46f4e007a1cf27193/"
+                     + "raw/38696e5b84cd6b66667a6b87c66c058ab2606ba2/galleries.json";
 
     fetch(endpoint)
         .then(response => {
@@ -13,20 +25,20 @@ window.addEventListener("load", function () {
             if (response.ok) {
                 result = response.json();
             } else {
-                result = Promise.reject({
-                                            status: response.status,
-                                            statusText: response.statusText
-                                        });
+                result = Promise.reject({status: response.status, statusText: response.statusText});
             }
 
             return result;
         })
         .catch(error => console.log(error))
-        .then(data => processPageData(data));
+        .then(data => processPageData(data))
+        .catch(error => console.log(error));
 });
 
 function processPageData(data) {
     let galleryListData = data.map(gallery => gallery.nameEn);
+    let paintingList = data.map(gallery => ({"Name": gallery.nameEn, "Paintings": gallery.paintings}));
+    let locations = data.map(gallery => ({"Name": gallery.nameEn, "Location": gallery.location}));
     let galleryDescriptionData = data.map(gallery => ({
         "Name": gallery.nameEn,
         "Native Name": gallery.nameNative,
@@ -37,34 +49,64 @@ function processPageData(data) {
     }));
 
     populateGalleryList(galleryListData);
-    populateGalleryListEvents(galleryDescriptionData);
+    populateGalleryListEvents(galleryDescriptionData, paintingList, locations);
+}
+
+function populateGalleryList(galleryListData) {
+    let galleryList = document.querySelector("#galleryList");
+
+    galleryListData.forEach(galleryName => {
+        let listItem = document.createElement("LI");
+        let nameNode = document.createTextNode(galleryName);
+        listItem.appendChild(nameNode);
+
+        galleryList.appendChild(listItem);
+    });
 
     //Make gallery list section visible
     document.querySelector("div.b section").style.display = "block";
 }
 
-function populateGalleryList(list) {
-    let galleryList = document.querySelector("#galleryList");
-
-    list.forEach(galleryName => {
-        let listItem = document.createElement("LI");
-        let nameNode = document.createTextNode(galleryName);
-
-        listItem.appendChild(nameNode);
-
-        galleryList.appendChild(listItem);
-    });
-}
-
-function galleryClickHandler(e, galleryDescriptions) {
+function galleryClickHandler(e, galleryDescriptions, paintingList, locations) {
     //This assumes that there are no duplicate gallery names due to the lack of guaranteed unique identification
     let gallery = galleryDescriptions.find(desc => desc["Name"] === e.target.textContent);
     populateGalleryDescription(gallery);
+    let selectedPaintings = paintingList.find(item => item["Name"] === e.target.textContent);
+    let paintings = selectedPaintings["Paintings"];
+    populatePaintings(paintings);
+    let selectedLocation = locations.find(place => place["Name"] === e.target.textContent);
+    let location = selectedLocation["Location"];
+    initMap(location.latitude, location.longitude);
 }
 
-function populateGalleryListEvents(galleryDescriptionData) {
-    document.querySelectorAll("ul#galleryList li")
-            .forEach(item => item.addEventListener("click", e => galleryClickHandler(e, galleryDescriptionData)));
+function populatePaintings(paintings) {
+    let oldPaintingList = document.querySelector("#paintingList");
+    let paintingListParent = oldPaintingList.parentElement;
+
+    //Create new list node to replace existing node
+    let paintingList = document.createElement("ul");
+    paintingList.id = "paintingList";
+
+    //Populate new list with selected paintings
+    paintings.forEach(painting => {
+        let listItem = document.createElement("LI");
+        let nameNode = document.createTextNode(painting.title);
+        listItem.appendChild(nameNode);
+
+        paintingList.appendChild(listItem);
+    });
+
+    //Update list of painting with new node
+    paintingListParent.replaceChild(paintingList, oldPaintingList);
+
+    //Make gallery list section visible
+    document.querySelector("div.c section").style.display = "block";
+}
+
+function populateGalleryListEvents(galleryDescriptionData, paintingList, location) {
+    document.querySelectorAll("ul#galleryList li").forEach(item => item.addEventListener("click", e => {
+        galleryClickHandler(e, galleryDescriptionData, paintingList, location);
+    }));
 }
 
 function populateGalleryDescription(data) {
