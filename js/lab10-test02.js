@@ -20,6 +20,9 @@ window.addEventListener("load", () => {
 });
 
 function processPageData(data) {
+    removeTemplateLetters();
+
+    //Create data containing object that are limited in domain to simplify later logic for discrete components
     let galleryListData = data.map(gallery => gallery.nameEn);
     let paintingList = data.map(gallery => ({"Name": gallery.nameEn, "Paintings": gallery.paintings}));
     let locations = data.map(gallery => ({"Name": gallery.nameEn, "Location": gallery.location}));
@@ -34,6 +37,21 @@ function processPageData(data) {
 
     populateGalleryList(galleryListData);
     populateGalleryListEvents(galleryDescriptionData, paintingList, locations);
+}
+
+function removeTemplateLetters() {
+    //Remove the first text node containing placeholder letter
+    let a = document.querySelector("div.a");
+    a.removeChild(a.firstChild);
+
+    let b = document.querySelector("div.b");
+    b.removeChild(b.firstChild);
+
+    let c = document.querySelector("div.c");
+    c.removeChild(c.firstChild);
+
+    let d = document.querySelector("div.d");
+    d.removeChild(d.firstChild);
 }
 
 function populateGalleryList(galleryListData) {
